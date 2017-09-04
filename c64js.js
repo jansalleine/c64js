@@ -220,6 +220,7 @@ class Canvas
         _.parent.appendChild( _.elem );
         _.width = SCREENSIZEX;
         _.height = SCREENSIZEY;
+
         _.context = _.elem.getContext( "2d" );
         _.palette = new Palette16();
         _.scale();
@@ -230,6 +231,7 @@ class Canvas
         let _ = this,
             xpos = x,
             ypos = y;
+
         _.context.fillStyle = _.palette[color];
         _.context.fillRect( xpos, ypos, width, height);
     }
@@ -239,6 +241,7 @@ class Canvas
         let _ = this,
             xpos = x,
             ypos = y;
+
         _.context.fillStyle = _.palette[color];
         _.context.fillRect( xpos, ypos, _.pixelSize, _.pixelSize);
     }
@@ -252,6 +255,7 @@ class Canvas
               - parseFloat( parentStyle.paddingLeft )
               - parseFloat( parentStyle.paddingRight ),
             scale = floor( ( parentWidth / _.width ), 1 );
+
         _.elem.width = _.width * scale;
         _.elem.height = _.height * scale;
         _.pixelSize = scale / 2;
@@ -268,18 +272,21 @@ function OutputArea ( id )
 {
     let _ = this;
     _.id = id;
+
     _.elem = document.getElementById( _.id );
 }
 
 OutputArea.prototype.write = function ( string )
 {
     let _ = this;
+
     _.elem.innerText += string + "\n";
 }
 
 function GenerateXmap ()
 {
     let string = "_.xmap = { \"in\" : { ";
+
     for ( let i = 0; i < 24; i++ )
     {
         string += "\"" + ( 0x1e0 + i ) + "\": \""+ i + "\", ";
@@ -298,6 +305,7 @@ function GenerateXmap ()
         string += "\"" + ( i + 24 ) + "\" : \"" + i + "\", ";
     }
     string += " \"380\" : \"404\" } }; ";
+
     return string;
 }
 
@@ -321,6 +329,7 @@ class Vic
     read ( register )
     {
         let _ = this;
+
         if ( register >= _.base )
         {
             register -= _.base;
@@ -331,6 +340,7 @@ class Vic
     write ( register, value )
     {
         let _ = this;
+
         if ( register >= _.base )
         {
             register -= _.base;
@@ -344,6 +354,7 @@ class C64Screen
     constructor ( id )
     {
         let _ = this;
+
         _.canvas = new Canvas( id );
         _.init( LIGHT_BLUE, BLUE, LIGHT_BLUE );
     }
