@@ -22,8 +22,7 @@ const   OFFSETX             = 0x1f7 - 0x1e0 + 1;
 
 function Palette16 ()
 {
-    return
-    [
+    return [
         "#000000", "#ffffff", "#bc5241", "#8feffb",
         "#b956eb", "#7edb40", "#553fe4", "#ffff77",
         "#c17b1d", "#826300", "#f49486", "#727272",
@@ -33,8 +32,7 @@ function Palette16 ()
 
 function Charset ()
 {
-    return
-    [
+    return [
         0x3c, 0x66, 0x6e, 0x6e, 0x60, 0x62, 0x3c, 0x00, 0x18, 0x3c, 0x66, 0x7e,
         0x66, 0x66, 0x66, 0x00, 0x7c, 0x66, 0x66, 0x7c, 0x66, 0x66, 0x7c, 0x00,
         0x3c, 0x66, 0x60, 0x60, 0x60, 0x66, 0x3c, 0x00, 0x78, 0x6c, 0x66, 0x66,
@@ -213,74 +211,49 @@ class Canvas
 {
     constructor ( id )
     {
-        let _ = this;
-        _.id = id;
-        _.parent = document.getElementById( _.id );
-        _.elem = document.createElement( "canvas" );
-        _.parent.appendChild( _.elem );
-        _.width = SCREENSIZEX;
-        _.height = SCREENSIZEY;
+        this.id = id;
+        this.parent = document.getElementById( this.id );
+        this.elem = document.createElement( "canvas" );
+        this.parent.appendChild( this.elem );
+        this.width = SCREENSIZEX;
+        this.height = SCREENSIZEY;
 
-        _.context = _.elem.getContext( "2d" );
-        _.palette = new Palette16();
-        _.scale();
+        this.context = this.elem.getContext( "2d" );
+        this.palette = new Palette16();
+        this.scale();
     }
 
     drawRect ( x, y, width, height, color )
     {
-        let _ = this,
-            xpos = x,
-            ypos = y;
-
-        _.context.fillStyle = _.palette[color];
-        _.context.fillRect( xpos, ypos, width, height);
+        this.context.fillStyle = this.palette[color];
+        this.context.fillRect( x, y, width, height);
     }
 
     plotPixel ( x, y, color )
     {
-        let _ = this,
-            xpos = x,
-            ypos = y;
-
-        _.context.fillStyle = _.palette[color];
-        _.context.fillRect( xpos, ypos, _.pixelSize, _.pixelSize);
+        this.context.fillStyle = this.palette[color];
+        this.context.fillRect( x, y, this.pixelSize, this.pixelSize);
     }
 
     scale ()
     {
-        let _ = this,
-            parentStyle = getComputedStyle( _.parent ),
+        let parentStyle = getComputedStyle( this.parent ),
             parentWidth =
                 parseFloat( parentStyle.width )
               - parseFloat( parentStyle.paddingLeft )
               - parseFloat( parentStyle.paddingRight ),
-            scale = floor( ( parentWidth / _.width ), 1 );
+            scale = floor( ( parentWidth / this.width ), 1 );
 
-        _.elem.width = _.width * scale;
-        _.elem.height = _.height * scale;
-        _.pixelSize = scale / 2;
-        _.context.scale( scale, scale );
+        this.elem.width = this.width * scale;
+        this.elem.height = this.height * scale;
+        this.pixelSize = scale / 2;
+        this.context.scale( scale, scale );
     }
 }
 
 function floor (value, decimals)
 {
     return Number( Math.floor( value + "e" + decimals ) + "e-" + decimals );
-}
-
-function OutputArea ( id )
-{
-    let _ = this;
-    _.id = id;
-
-    _.elem = document.getElementById( _.id );
-}
-
-OutputArea.prototype.write = function ( string )
-{
-    let _ = this;
-
-    _.elem.innerText += string + "\n";
 }
 
 function GenerateXmap ()
@@ -313,10 +286,8 @@ class Vic
 {
     constructor ()
     {
-        let _ = this;
-        _.base = 0xD000;
-        _.registers =
-        [
+        this.base = 0xD000;
+        this.registers = [
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // $D000 - $D007
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // $D008 - $D00F
             0x00, 0x9B, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, // $D010 - $D017
@@ -328,24 +299,20 @@ class Vic
 
     read ( register )
     {
-        let _ = this;
-
-        if ( register >= _.base )
+        if ( register >= this.base )
         {
-            register -= _.base;
+            register -= this.base;
         }
-        return _.registers[ register ];
+        return this.registers[ register ];
     }
 
     write ( register, value )
     {
-        let _ = this;
-
-        if ( register >= _.base )
+        if ( register >= this.base )
         {
-            register -= _.base;
+            register -= this.base;
         }
-        _.registers[ register ] = value;
+        this.registers[ register ] = value;
     }
 }
 
@@ -353,15 +320,15 @@ class C64Screen
 {
     constructor ( id )
     {
-        let _ = this;
-
-        _.canvas = new Canvas( id );
-        _.init( LIGHT_BLUE, BLUE, LIGHT_BLUE );
+        this.canvas = new Canvas( id );
+        this.vic = new Vic();
+        this.init( LIGHT_BLUE, BLUE, LIGHT_BLUE );
     }
 
     init ( borderColor, backgroundColor, textColor )
     {
-        let _ = this;
+        this.canvas.drawRect( 0, 0, SCREENSIZEX, SCREENSIZEY, backgroundColor );
+        this.drawBorder( borderColor );
     }
 
     xToScreen ( x )
@@ -372,6 +339,30 @@ class C64Screen
     screenToX ( x )
     {
         return x <= 23 ? 480 + x : x;
+    }
+
+    drawBorder ( color )
+    {
+        let x0 = 0x18,
+            x1 = 0x157,
+            y0 = 0x33,
+            y1 = 0xfa;
+
+        if ( !( this.vic.read( 0xD011 ) & 0b00001000 ) )
+        {
+            y0 = 0x37;
+            y1 = 0xf6;
+        }
+        if ( !( this.vic.read( 0xD016 ) & 0b00001000 ) )
+        {
+            x0 = 0x1f;
+            x1 = 0x14e;
+        }
+
+        let width = x1 - x0 + 1,
+            height = y1 - y0 + 1;
+
+        console.log (width, height);
     }
 }
 
