@@ -301,7 +301,7 @@ function GenerateXmap ()
     return string;
 }
 
-function Vic ()
+class Vic
 {
     constructor ()
     {
