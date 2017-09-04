@@ -16,9 +16,15 @@ const   BLACK               = 0x00,
         LIGHT_GREY          = 0x0F;
 
 const   SCREENSIZEX         = 404,
-        SCREENSIZEY         = 312;
-
-const   OFFSETX             = 0x1f7 - 0x1e0 + 1;
+        SCREENSIZEY         = 312,
+        FIRSTX38            = 0x1f,
+        FIRSTX40            = 0x18,
+        LASTX38             = 0x14e,
+        LASTX40             = 0x157,
+        FIRSTY24            = 0x37,
+        FIRSTY25            = 0x33,
+        LASTY24             = 0xf6,
+        LASTY25             = 0xfa;
 
 function Palette16 ()
 {
@@ -226,7 +232,7 @@ class Canvas
     drawRect ( x, y, width, height, color )
     {
         this.context.fillStyle = this.palette[color];
-        this.context.fillRect( x, y, width, height);
+        this.context.fillRect( x, y, width, height );
     }
 
     plotPixel ( x, y, color )
@@ -343,26 +349,41 @@ class C64Screen
 
     drawBorder ( color )
     {
-        let x0 = 0x18,
-            x1 = 0x157,
-            y0 = 0x33,
-            y1 = 0xfa;
+        let border = {  "left":  { "x0": 480, "x1": FIRSTX40-1,
+                                   "y0": 0, "y1": SCREENSIZEY },
+                        "right": { "x0": LASTX40+1, "x1": SCREENSIZEX,
+                                   "y0": 0, "y1": SCREENSIZEY },
+                        "top":   { "x0": FIRSTX40-1, "x1": LASTX40+1,
+                                   "y0": 0, "y1": FIRSTY25-1 },
+                        "bottom":{ "x0": FIRSTX40-1, "x1": LASTX40+1,
+                                   "y0": LASTY25+1, "y1": SCREENSIZEY }
+                     };
 
         if ( !( this.vic.read( 0xD011 ) & 0b00001000 ) )
         {
-            y0 = 0x37;
-            y1 = 0xf6;
+            border["top"]["y1"] = FIRSTY24-1;
+            border["bottom"]["y0"] = LASTY24+1;
         }
         if ( !( this.vic.read( 0xD016 ) & 0b00001000 ) )
         {
-            x0 = 0x1f;
-            x1 = 0x14e;
+            border["left"]["x1"] = FIRSTX38-1;
+            border["right"]["x0"] = LASTX38+1;
+            border["top"]["x0"] = FIRSTX38-1;
+            border["top"]["x1"] = LASTX38+1;
+            border["bottom"]["x0"] = FIRSTX38-1;
+            border["bottom"]["x1"] = LASTX38+1;
         }
 
-        let width = x1 - x0 + 1,
-            height = y1 - y0 + 1;
-
-        console.log (width, height);
+        for ( let key in border )
+        {
+            let width = this.xToScreen( border[key]["x1"] )
+                      - this.xToScreen( border[key]["x0"] ) + 1,
+                height = border[key]["y1"] - border[key]["y0"];
+            this.canvas.drawRect(
+                this.xToScreen( border[key]["x0"] ),
+                border[key]["y0"], width, height, color
+            );
+        }
     }
 }
 
