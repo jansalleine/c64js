@@ -40,16 +40,13 @@ class Canvas
 {
     constructor ( id )
     {
-        this.id = id;
-        this.parent = document.getElementById( this.id );
+        this.parent = document.getElementById( id );
         this.elem = document.createElement( "canvas" );
         this.parent.appendChild( this.elem );
-        this.width = SCREENSIZEX;
-        this.height = SCREENSIZEY;
-
+        this.elem.width = SCREENSIZEX;
+        this.elem.height = SCREENSIZEY;
         this.context = this.elem.getContext( "2d" );
         this.palette = new Palette16();
-        this.scale();
     }
 
     drawRect ( x, y, width, height, color )
@@ -61,54 +58,8 @@ class Canvas
     plotPixel ( x, y, color )
     {
         this.context.fillStyle = this.palette[color];
-        this.context.fillRect( x, y, this.pixelSize, this.pixelSize);
+        this.context.fillRect( x, y, 1, 1 );
     }
-
-    scale ()
-    {
-        let parentStyle = getComputedStyle( this.parent ),
-            parentWidth =
-                parseFloat( parentStyle.width )
-              - parseFloat( parentStyle.paddingLeft )
-              - parseFloat( parentStyle.paddingRight ),
-            scale = floor( ( parentWidth / this.width ), 1 );
-
-        this.elem.width = this.width * scale;
-        this.elem.height = this.height * scale;
-        this.pixelSize = scale / 2;
-        this.context.scale( scale, scale );
-    }
-}
-
-function floor (value, decimals)
-{
-    return Number( Math.floor( value + "e" + decimals ) + "e-" + decimals );
-}
-
-function GenerateXmap ()
-{
-    let string = "_.xmap = { \"in\" : { ";
-
-    for ( let i = 0; i < 24; i++ )
-    {
-        string += "\"" + ( 0x1e0 + i ) + "\": \""+ i + "\", ";
-    }
-    for ( let i = 0; i < 0x17c; i++ )
-    {
-        string += "\"" + i + "\" : \"" + ( i + 24 ) + "\", ";
-    }
-    string += " \"404\" : \"380\" } , \"out\" : { ";
-    for ( let i = 0; i < 24; i++ )
-    {
-        string += "\"" + i + "\": \"" + ( 0x1e0 + i ) + "\", ";
-    }
-    for ( let i = 0; i < 0x17c; i++ )
-    {
-        string += "\"" + ( i + 24 ) + "\" : \"" + i + "\", ";
-    }
-    string += " \"380\" : \"404\" } }; ";
-
-    return string;
 }
 
 class MemoryBlock
@@ -519,60 +470,22 @@ class C64Screen
             else
             {
                 pixelPos["x"] += 8;
-                console.log( i );
             }
             pixelPos["y"] = currentLine * 8 + FIRSTY25;
             for ( let j = 0; j < 8; j++ )
             {
                 let charLine = this.charset.load( this.charset.base + charOffset + j );
 
-                if ( charLine & 0b10000000 )
+                for ( let k = 7; k >= 0; k-- )
                 {
-                    this.canvas.plotPixel( pixelPos["x"], pixelPos["y"], color );
+                    if ( charLine & Math.pow( 2, k ) )
+                    {
+                        this.canvas.plotPixel( pixelPos["x"], pixelPos["y"], color );
+                    }
+                    pixelPos["x"] += 1;
                 }
-                pixelPos["x"] += 1;
 
-                if ( charLine & 0b01000000 )
-                {
-                    this.canvas.plotPixel( pixelPos["x"], pixelPos["y"], color );
-                }
-                pixelPos["x"] += 1;
-
-                if ( charLine & 0b00100000 )
-                {
-                    this.canvas.plotPixel( pixelPos["x"], pixelPos["y"], color );
-                }
-                pixelPos["x"] += 1;
-
-                if ( charLine & 0b00010000 )
-                {
-                    this.canvas.plotPixel( pixelPos["x"], pixelPos["y"], color );
-                }
-                pixelPos["x"] += 1;
-
-                if ( charLine & 0b00001000 )
-                {
-                    this.canvas.plotPixel( pixelPos["x"], pixelPos["y"], color );
-                }
-                pixelPos["x"] += 1;
-
-                if ( charLine & 0b00000100 )
-                {
-                    this.canvas.plotPixel( pixelPos["x"], pixelPos["y"], color );
-                }
-                pixelPos["x"] += 1;
-
-                if ( charLine & 0b00000010 )
-                {
-                    this.canvas.plotPixel( pixelPos["x"], pixelPos["y"], color );
-                }
-                pixelPos["x"] += 1;
-
-                if ( charLine & 0b00000001 )
-                {
-                    this.canvas.plotPixel( pixelPos["x"], pixelPos["y"], color );
-                }
-                pixelPos["x"] -= 7;
+                pixelPos["x"] -= 8;
                 pixelPos["y"] += 1;
             }
         }
