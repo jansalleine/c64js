@@ -353,12 +353,12 @@ class C64Screen
         let _ = this;
     }
 
-    XToScreen ( x )
+    xToScreen ( x )
     {
         return x >= 480 ? x - 480 : x + 24;
     }
 
-    ScreenToX ( x )
+    screenToX ( x )
     {
         return x <= 23 ? 480 + x : x;
     }
