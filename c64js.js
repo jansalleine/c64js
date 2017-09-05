@@ -1,3 +1,5 @@
+const   DEBUG               = 0;
+
 const   BLACK               = 0x00,
         WHITE               = 0x01,
         RED                 = 0x02,
@@ -17,14 +19,10 @@ const   BLACK               = 0x00,
 
 const   SCREENSIZEX         = 404,
         SCREENSIZEY         = 312,
-        FIRSTX38            = 0x1f,
-        FIRSTX40            = 0x18,
-        LASTX38             = 0x14e,
-        LASTX40             = 0x157,
-        FIRSTY24            = 0x37,
-        FIRSTY25            = 0x33,
-        LASTY24             = 0xf6,
-        LASTY25             = 0xfa;
+        FIRSTX              = 0x18,
+        LASTX               = 0x157,
+        FIRSTY              = 0x30,
+        LASTY               = 0xf7;
 
 function Palette16 ()
 {
@@ -501,11 +499,9 @@ class C64Screen
         this.init( LIGHT_BLUE, BLUE, LIGHT_BLUE );
     }
 
-    init ( borderColor, backgroundColor, textColor )
+    init ()
     {
-        this.canvas.drawRect( 0, 0, SCREENSIZEX, SCREENSIZEY, backgroundColor );
-        this.drawBorder();
-        this.drawScreen( this.vidmem, this.charset, "hires" );
+        this.drawScreen( this.vidmem, this.charset );
     }
 
     xToScreen ( x )
@@ -520,45 +516,45 @@ class C64Screen
 
     drawBorder ()
     {
-        let border = {  "left":  { "x0": 480, "x1": FIRSTX40-1,
-                                   "y0": 0, "y1": SCREENSIZEY },
-                        "right": { "x0": LASTX40+1, "x1": SCREENSIZEX,
-                                   "y0": 0, "y1": SCREENSIZEY },
-                        "top":   { "x0": FIRSTX40-1, "x1": LASTX40+1,
-                                   "y0": 0, "y1": FIRSTY25 },
-                        "bottom":{ "x0": FIRSTX40-1, "x1": LASTX40+1,
-                                   "y0": LASTY25+1, "y1": SCREENSIZEY }
+        let colmode = this.vic.load( 0xD016 ) & 0b00001000,
+            rowmode = this.vic.load( 0xD011 ) & 0b00001000,
+            xleft = colmode ? FIRSTX - 1 : FIRSTX + 6,
+            xright = colmode ? LASTX + 1 : LASTX - 8,
+            ytop = rowmode ? FIRSTY + 3 : FIRSTY + 7,
+            ybottom = rowmode ? LASTY + 4 : LASTY,
+            border = {  "left":  {  "x0": 480,
+                                    "x1": xleft,
+                                    "y0": 0,
+                                    "y1": SCREENSIZEY },
+                        "right": {  "x0": xright,
+                                    "x1": SCREENSIZEX,
+                                    "y0": 0,
+                                    "y1": SCREENSIZEY },
+                        "top":   {  "x0": xleft,
+                                    "x1": xright,
+                                    "y0": 0,
+                                    "y1": ytop },
+                        "bottom":{  "x0": xleft,
+                                    "x1": xright,
+                                    "y0": ybottom,
+                                    "y1": SCREENSIZEY }
                      },
             color = this.vic.load( 0xD020 );
 
-        if ( !( this.vic.load( 0xD011 ) & 0b00001000 ) )
+        for ( let pos in border )
         {
-            border["top"]["y1"] = FIRSTY24;
-            border["bottom"]["y0"] = LASTY24+1;
-        }
-        if ( !( this.vic.load( 0xD016 ) & 0b00001000 ) )
-        {
-            border["left"]["x1"] = FIRSTX38-1;
-            border["right"]["x0"] = LASTX38+1;
-            border["top"]["x0"] = FIRSTX38-1;
-            border["top"]["x1"] = LASTX38+1;
-            border["bottom"]["x0"] = FIRSTX38-1;
-            border["bottom"]["x1"] = LASTX38+1;
-        }
+            let width = this.xToScreen( border[pos]["x1"] )
+                      - this.xToScreen( border[pos]["x0"] ) + 1,
+                height = border[pos]["y1"] - border[pos]["y0"];
 
-        for ( let key in border )
-        {
-            let width = this.xToScreen( border[key]["x1"] )
-                      - this.xToScreen( border[key]["x0"] ) + 1,
-                height = border[key]["y1"] - border[key]["y0"];
             this.canvas.drawRect(
-                this.xToScreen( border[key]["x0"] ),
-                border[key]["y0"], width, height, color
+                this.xToScreen( border[pos]["x0"] ),
+                border[pos]["y0"], width, height, color
             );
         }
     }
 
-    drawChar ( x, y, color, screenCode, charset, mode )
+    drawChar ( x, y, color, screenCode, charset )
     {
         let offset = screenCode * 8;
 
@@ -574,7 +570,8 @@ class C64Screen
                 }
                 else
                 {
-                    this.canvas.plotPixel( x, y, this.vic.load( 0xD021 ) );
+                    if ( DEBUG )
+                        this.canvas.plotPixel( x, y, BLACK );
                 }
                 x++;
             }
@@ -584,27 +581,29 @@ class C64Screen
         }
     }
 
-    drawScreenRow ( row, vidmem, charset, mode )
+    drawScreenRow ( row, vidmem, charset )
     {
-        let x = FIRSTX40,
-            y = FIRSTY25 + ( row * 8 );
-
+        let x = FIRSTX + ( this.vic.load( 0xD016 ) & 7 ),
+            y = FIRSTY+ ( row * 8 ) + ( this.vic.load( 0xD011 ) & 7 );
+        console.log( y.toString(16) );
         for ( let col = 0; col < 40; col++ )
         {
             let screenCode = vidmem.load( row * 40 + col + vidmem.base ),
                 color = this.colram.loadLowNibble( row * 40 + col + this.colram.base );
 
-            this.drawChar( this.xToScreen( x ), y, color, screenCode, charset, mode );
+            this.drawChar( this.xToScreen( x ), y, color, screenCode, charset );
             x += 8;
         }
     }
 
-    drawScreen ( vidmem, charset, mode )
+    drawScreen ( vidmem, charset )
     {
+        this.canvas.drawRect( 0, 0, SCREENSIZEX, SCREENSIZEY, this.vic.load( 0xD021 ) );
         for ( let row = 0; row < 25; row++ )
         {
-            this.drawScreenRow ( row, vidmem, charset, mode );
+            this.drawScreenRow ( row, vidmem, charset );
         }
+        this.drawBorder();
     }
 }
 
