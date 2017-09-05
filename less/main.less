@@ -1,0 +1,94 @@
+@import "inc/variables.less";
+@import "inc/mixins.less";
+@import "inc/grid.less";
+
+body, *
+{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body
+{
+    background-color: #111;
+    color: #eee;
+    font-family: monospace;
+    font-size: 18px;
+}
+
+.wrap
+{
+    width: 100%;
+}
+
+.wrap:after,
+.wrap:before
+{
+    clear: both;
+    content: " ";
+    display: table;
+}
+
+.area
+{
+    display: block;
+    float: left;
+    min-height: 1px;
+    padding: 0 15px;
+}
+
+.col12 {
+    width: 100%;
+}
+.col11 {
+    width: 91.66666667%;
+}
+.col10 {
+    width: 83.33333333%;
+}
+.col9 {
+    width: 75%;
+}
+.col8 {
+    width: 66.66666667%;
+}
+.col7 {
+    width: 58.33333333%;
+}
+.col6 {
+    width: 50%;
+}
+.col5 {
+    width: 41.66666667%;
+}
+.col4 {
+    width: 33.33333333%;
+}
+.col3 {
+    width: 25%;
+}
+.col2 {
+    width: 16.66666667%;
+}
+.col1 {
+    width: 8.33333333%;
+}
+
+#output
+{
+
+}
+
+#canvas2d
+{
+
+}
+
+#canvas2d canvas
+{
+    background-color: #fff;
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+}
