@@ -585,7 +585,7 @@ class C64Screen
     {
         let x = FIRSTX + ( this.vic.load( 0xD016 ) & 7 ),
             y = FIRSTY+ ( row * 8 ) + ( this.vic.load( 0xD011 ) & 7 );
-        console.log( y.toString(16) );
+
         for ( let col = 0; col < 40; col++ )
         {
             let screenCode = vidmem.load( row * 40 + col + vidmem.base ),
@@ -599,10 +599,12 @@ class C64Screen
     drawScreen ( vidmem, charset )
     {
         this.canvas.drawRect( 0, 0, SCREENSIZEX, SCREENSIZEY, this.vic.load( 0xD021 ) );
+
         for ( let row = 0; row < 25; row++ )
         {
             this.drawScreenRow ( row, vidmem, charset );
         }
+
         this.drawBorder();
     }
 }
