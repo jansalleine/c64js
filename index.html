@@ -10,6 +10,40 @@
             <div id="canvas2d"></div>
         </div>
         <div class="area col4">
+            <div class="fileinputform" data-filetype="vidmem">
+                <h3>Load vidmem / screen data</h3>
+                <form role="form">
+                    <div class="form-group">
+                        <label for="inputfile">Choose inputfile:</label>
+                        <input type="file" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="blockstyle">Select file format:</label>
+                        <label class="radio"><input type="radio" name="optFileFormat" checked>PRG</label>
+                        <label class="radio"><input type="radio" name="optFileFormat">BIN</label>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-default">Load File!</button>
+                    </div>
+                </form>
+            </div>
+            <div class="fileinputform" data-filetype="colram">
+                <h3>Load color ram data</h3>
+                <form role="form">
+                    <div class="form-group">
+                        <label for="inputfile">Choose inputfile:</label>
+                        <input type="file" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="blockstyle">Select file format:</label>
+                        <label class="radio"><input type="radio" name="optFileFormat" checked>PRG</label>
+                        <label class="radio"><input type="radio" name="optFileFormat">BIN</label>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-default">Load File!</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     <script src="c64js.js"></script>

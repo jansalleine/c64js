@@ -34,10 +34,62 @@ function Palette16 ()
     ];
 }
 
-function forceDefine ( param, defaultValue )
+class FileLoader
 {
-    let value = typeof( defaultValue ) !== "undefined" ? defaultValue : "";
-    return typeof( param ) !== "undefined" ? param : value;
+    constructor ( elem )
+    {
+        this.elem = elem;
+        this.filetype = elem.dataset.filetype;
+        this.file = {};
+        this.fileData = [];
+        this.ready = 0;
+        this.submitEvent =  elem.querySelector( "button[type=submit]" )
+                            .addEventListener( "click", this.loadFile.bind( this ) );
+        this.offset = 2;
+    }
+
+    loadFile ( e )
+    {
+        e.preventDefault();
+        let reader = new FileReader();
+        this.ready = 0;
+        this.file = this.elem.querySelector( "input[type=file]" ).files[0];
+        this.offset = this.elem.querySelectorAll( "input[name=optFileFormat]" )[0].checked ? 2 : 0;
+
+        reader.readAsArrayBuffer( this.file );
+
+        reader.onload = this.loaded.bind( this );
+        reader.onerror = this.errorHandler.bind( this );
+    }
+
+    loaded ( e )
+    {
+        this.fileData = new Uint8Array( e.target.result );
+        this.ready = 1;
+    }
+
+    errorHandler ( e )
+    {
+        if ( e.target.error.name === "NotReadableError" )
+        {
+            console.log( "LOAD ERROR!" );
+        }
+        this.ready = 1;
+    }
+}
+
+function blaTest ()
+{
+    let elems = document.querySelectorAll( ".fileinputform" );
+    console.log( elems );
+    elems.forEach( function ( elem ) {
+        console.log( elem );
+        let inputs = elem.querySelector( "input[type=file]" );
+        console.log( inputs );
+        //~ inputs.forEach( function ( input ) {
+            //~ console.log( input );
+        //~ });
+    });
 }
 
 class Canvas
@@ -610,3 +662,10 @@ class C64Screen
 }
 
 let screen = new C64Screen( "canvas2d" );
+
+let fileInputForms = document.querySelectorAll( ".fileinputform" );
+let fileLoader = [];
+fileInputForms.forEach( function ( inputForm ) {
+    fileLoader.push( new FileLoader( inputForm ) );
+});
+console.log( fileLoader );
