@@ -78,20 +78,6 @@ class FileLoader
     }
 }
 
-function blaTest ()
-{
-    let elems = document.querySelectorAll( ".fileinputform" );
-    console.log( elems );
-    elems.forEach( function ( elem ) {
-        console.log( elem );
-        let inputs = elem.querySelector( "input[type=file]" );
-        console.log( inputs );
-        //~ inputs.forEach( function ( input ) {
-            //~ console.log( input );
-        //~ });
-    });
-}
-
 class Canvas
 {
     constructor ( id )
@@ -548,7 +534,7 @@ class C64Screen
         this.vidmem = new Vidmem( 0x0400 );
         this.colram = new Colram();
         this.charset = new Charset( 0x1000 );
-        this.init( LIGHT_BLUE, BLUE, LIGHT_BLUE );
+        this.init();
     }
 
     init ()
@@ -663,8 +649,9 @@ class C64Screen
 
 let screen = new C64Screen( "canvas2d" );
 
-let fileInputForms = document.querySelectorAll( ".fileinputform" );
-let fileLoader = [];
+let fileInputForms = document.querySelectorAll( ".fileinputform" ),
+    fileLoader = [];
+
 fileInputForms.forEach( function ( inputForm ) {
     fileLoader.push( new FileLoader( inputForm ) );
 });
