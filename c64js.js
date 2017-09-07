@@ -660,6 +660,56 @@ let c64App = (function ()
             fileInputForms.forEach( function ( inputForm ) {
                 this.fileLoader.push( new FileLoader( inputForm ) );
             }.bind( this ));
+
+            requestAnimationFrame( this.update.bind( this ) );
+        }
+
+        update ()
+        {
+            requestAnimationFrame( this.update.bind( this ) );
+            this.fileLoader.forEach( function ( fileLoader ) {
+                if ( fileLoader.ready )
+                {
+                    fileLoader.ready = 0;
+
+                    switch ( fileLoader.filetype )
+                    {
+                        case "vidmem":
+                        {
+                            let offset = fileLoader.offset,
+                                vidmemBase = this.screen.vidmem.base;
+
+                            for ( let i = 0; i < 1000; i++ )
+                            {
+                                this.screen.vidmem.store(
+                                    vidmemBase + i,
+                                    fileLoader.fileData[ i + offset ]
+                                );
+                            }
+                            break;
+                        }
+                        case "colram":
+                        {
+                            let offset = fileLoader.offset,
+                                colramBase = this.screen.colram.base;
+
+                            for ( let i = 0; i < 1000; i++ )
+                            {
+                                this.screen.colram.store(
+                                    colramBase + i,
+                                    fileLoader.fileData[ i + offset ]
+                                );
+                            }
+                            break;
+                        }
+                        default:
+                        {
+                            break;
+                        }
+                    }
+                    this.screen.drawScreen( this.screen.vidmem, this.screen.charset );
+                }
+            }.bind( this ));
         }
     }
 
