@@ -657,9 +657,12 @@ let c64App = (function ()
             this.fileLoader = [];
 
             let fileInputForms = document.querySelectorAll( ".fileinputform" );
-            fileInputForms.forEach( function ( inputForm ) {
+            fileInputForms.forEach( function ( inputForm )
+            {
                 this.fileLoader.push( new FileLoader( inputForm ) );
             }.bind( this ));
+
+            this.initUi();
 
             requestAnimationFrame( this.update.bind( this ) );
         }
@@ -667,7 +670,8 @@ let c64App = (function ()
         update ()
         {
             requestAnimationFrame( this.update.bind( this ) );
-            this.fileLoader.forEach( function ( fileLoader ) {
+            this.fileLoader.forEach( function ( fileLoader )
+            {
                 if ( fileLoader.ready )
                 {
                     fileLoader.ready = 0;
@@ -710,6 +714,11 @@ let c64App = (function ()
                     this.screen.drawScreen( this.screen.vidmem, this.screen.charset );
                 }
             }.bind( this ));
+        }
+
+        initUi ()
+        {
+
         }
     }
 
